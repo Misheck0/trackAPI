@@ -1,7 +1,7 @@
 import puppeteer from 'puppeteer'; // Use full puppeteer instead of puppeteer-core
 import chromium from '@sparticuz/chromium-min'; // More reliable for Render.com
 
-async function trackParcel(orderID) {
+export async function trackParcel(orderID) { // Add 'export' keyword here
   let browser;
   try {
     browser = await puppeteer.launch({
@@ -20,7 +20,7 @@ async function trackParcel(orderID) {
       if (response.url().includes('/index/search?orderID=')) {
         try {
           const json = await response.json();
-          if (json.isOk === '1') trackingData = json.content.map(({time, description}) => ({time, description}));
+          if (json.isOk === '1') trackingData = json.content.map(({ time, description }) => ({ time, description }));
         } catch (e) {}
       }
     });
