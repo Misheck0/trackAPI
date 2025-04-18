@@ -1,13 +1,15 @@
-import puppeteer from 'puppeteer'; // Use full puppeteer instead of puppeteer-core
-import chromium from '@sparticuz/chromium-min'; // More reliable for Render.com
+import puppeteer from 'puppeteer';
+import chromium from '@sparticuz/chromium-min';
 
 export async function trackParcel(orderID) { // Add 'export' keyword here
   let browser;
   try {
+    const executablePath = chromium.executablePath ? await chromium.executablePath() : '/usr/bin/chromium-browser'; // Fallback
+
     browser = await puppeteer.launch({
       args: [...chromium.args, '--hide-scrollbars', '--disable-web-security'],
       defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
+      executablePath: executablePath,
       headless: chromium.headless,
       ignoreHTTPSErrors: true,
     });
