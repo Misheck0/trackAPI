@@ -1,22 +1,19 @@
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from 'chrome-aws-lambda';
 
 async function trackParcel(orderID) {
-  const browser = await puppeteer.launch({
-    headless: true,
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--disable-gpu',
-      '--single-process'
-    ]
-  });
-
+  let browser = null;
   let trackingData = [];
 
   try {
+    browser = await puppeteer.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+      defaultViewport: chromium.defaultViewport,
+      ignoreHTTPSErrors: true,
+    });
+
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
@@ -49,13 +46,19 @@ async function trackParcel(orderID) {
     if (trackingData.length > 0) {
       process.stdout.write(JSON.stringify({ status: 'success', tracking_info: trackingData }));
     } else {
-      process.stdout.write(JSON.stringify({ status: 'error', message: 'Failed to retrieve tracking data.' }));
+      process.stdout.write(JSON.stringify({ status: 'error', message: 'No tracking data found' }));
     }
   } catch (error) {
     console.error('Error:', error);
-    process.stdout.write(JSON.stringify({ status: 'error', message: 'An error occurred while processing the tracking request.' }));
+    process.stdout.write(JSON.stringify({ 
+      status: 'error', 
+      message: 'An error occurred while processing the tracking request',
+      error: error.message 
+    }));
   } finally {
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
   }
 }
 

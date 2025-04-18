@@ -7,15 +7,14 @@ const PORT = process.env.PORT || 3000;
 app.get('/track/:orderID', (req, res) => {
   const orderID = req.params.orderID;
 
-  exec(`node track.js ${orderID}`, {
-    env: {
-      ...process.env,
-      PUPPETEER_EXECUTABLE_PATH: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'
-    }
-  }, (err, stdout, stderr) => {
+  exec(`node track.js ${orderID}`, (err, stdout, stderr) => {
     if (err) {
       console.error('Execution error:', err);
-      return res.status(500).json({ status: 'error', message: 'Internal server error' });
+      return res.status(500).json({ 
+        status: 'error', 
+        message: 'Internal server error',
+        error: err.message 
+      });
     }
 
     try {
@@ -23,7 +22,11 @@ app.get('/track/:orderID', (req, res) => {
       res.json(result);
     } catch (e) {
       console.error('Parsing error:', e);
-      res.status(500).json({ status: 'error', message: 'Failed to parse tracking data' });
+      res.status(500).json({ 
+        status: 'error', 
+        message: 'Failed to parse tracking data',
+        error: e.message 
+      });
     }
   });
 });
