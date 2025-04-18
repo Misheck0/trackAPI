@@ -1,36 +1,20 @@
 import express from 'express';
-import { exec } from 'child_process';
+import { trackParcel } from './track.js'; // Direct import instead of child_process
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get('/track/:orderID', (req, res) => {
-  const orderID = req.params.orderID;
-
-  exec(`node track.js ${orderID}`, (err, stdout, stderr) => {
-    if (err) {
-      console.error('Execution error:', err);
-      return res.status(500).json({ 
-        status: 'error', 
-        message: 'Internal server error',
-        error: err.message 
-      });
-    }
-
-    try {
-      const result = JSON.parse(stdout);
-      res.json(result);
-    } catch (e) {
-      console.error('Parsing error:', e);
-      res.status(500).json({ 
-        status: 'error', 
-        message: 'Failed to parse tracking data',
-        error: e.message 
-      });
-    }
-  });
+app.get('/track/:orderID', async (req, res) => {
+  try {
+    const result = await trackParcel(req.params.orderID);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Server error',
+      error: error.message
+    });
+  }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
