@@ -7,7 +7,12 @@ const PORT = process.env.PORT || 3000;
 app.get('/track/:orderID', (req, res) => {
   const orderID = req.params.orderID;
 
-  exec(`node track.js ${orderID}`, (err, stdout, stderr) => {
+  exec(`node track.js ${orderID}`, {
+    env: {
+      ...process.env,
+      PUPPETEER_EXECUTABLE_PATH: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'
+    }
+  }, (err, stdout, stderr) => {
     if (err) {
       console.error('Execution error:', err);
       return res.status(500).json({ status: 'error', message: 'Internal server error' });

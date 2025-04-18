@@ -1,15 +1,16 @@
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer';
 
 async function trackParcel(orderID) {
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath: '/usr/bin/google-chrome-stable', // Render's default path
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       '--disable-accelerated-2d-canvas',
-      '--disable-gpu'
+      '--disable-gpu',
+      '--single-process'
     ]
   });
 
@@ -17,6 +18,7 @@ async function trackParcel(orderID) {
 
   try {
     const page = await browser.newPage();
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
     page.on('response', async (response) => {
       const url = response.url();
@@ -38,11 +40,11 @@ async function trackParcel(orderID) {
     });
 
     await page.goto(`https://www.fycargo.com/index/search?no=${orderID}`, {
-      waitUntil: 'domcontentloaded',
-      timeout: 60000
+      waitUntil: 'networkidle2',
+      timeout: 30000
     });
 
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     if (trackingData.length > 0) {
       process.stdout.write(JSON.stringify({ status: 'success', tracking_info: trackingData }));
