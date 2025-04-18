@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@sparticuz/chromium-min": "^116.0.1",
+    "@sparticuz/chromium-min": "^119.0.0",
     "express": "^5.1.0",
     "puppeteer": "^21.8.0"
   }
