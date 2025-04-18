@@ -1,8 +1,9 @@
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
 
 async function trackParcel(orderID) {
   const browser = await puppeteer.launch({
     headless: true,
+    executablePath: '/usr/bin/google-chrome-stable', // Render's default path
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
